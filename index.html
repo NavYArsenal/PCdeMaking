@@ -1,1 +1,117 @@
 
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>タッチ対応ライフゲーム</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: sans-serif;
+      background: #f0f0f0;
+    }
+    canvas {
+      border: 1px solid #555;
+      touch-action: none;
+    }
+    button {
+      font-size: 18px;
+      margin: 10px;
+      padding: 10px 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>ライフゲーム（タブレット対応）</h1>
+  <canvas id="game" width="400" height="400"></canvas><br>
+  <button id="startBtn">▶ スタート</button>
+  <button id="clearBtn">🧹 クリア</button>
+
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const rows = 40;
+    const cols = 40;
+    const cellSize = canvas.width / cols;
+    let grid = Array.from({length: rows}, () => Array(cols).fill(0));
+    let running = false;
+    let interval;
+
+    function drawGrid() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          ctx.fillStyle = grid[y][x] ? '#000' : '#fff';
+          ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+          ctx.strokeStyle = '#ccc';
+          ctx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
+        }
+      }
+    }
+
+    function updateGrid() {
+      const newGrid = grid.map(arr => arr.slice());
+      for (let y = 1; y < rows - 1; y++) {
+        for (let x = 1; x < cols - 1; x++) {
+          let count = 0;
+          for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+              if (dx !== 0 || dy !== 0) {
+                count += grid[y + dy][x + dx];
+              }
+            }
+          }
+          if (grid[y][x] === 1) {
+            newGrid[y][x] = (count === 2 || count === 3) ? 1 : 0;
+          } else {
+            newGrid[y][x] = (count === 3) ? 1 : 0;
+          }
+        }
+      }
+      grid = newGrid;
+      drawGrid();
+    }
+
+    function toggleCell(x, y) {
+      const col = Math.floor(x / cellSize);
+      const row = Math.floor(y / cellSize);
+      if (col >= 0 && col < cols && row >= 0 && row < rows) {
+        grid[row][col] = 1 - grid[row][col];
+        drawGrid();
+      }
+    }
+
+    // PC マウス用イベント
+    canvas.addEventListener('mousedown', e => {
+      const rect = canvas.getBoundingClientRect();
+      toggleCell(e.clientX - rect.left, e.clientY - rect.top);
+    });
+
+    // タブレット・スマホ タッチ用イベント
+    canvas.addEventListener('touchstart', e => {
+      const rect = canvas.getBoundingClientRect();
+      const touch = e.touches[0];
+      toggleCell(touch.clientX - rect.left, touch.clientY - rect.top);
+      e.preventDefault();
+    }, {passive: false});
+
+    document.getElementById('startBtn').addEventListener('click', () => {
+      running = !running;
+      document.getElementById('startBtn').textContent = running ? '⏸ ストップ' : '▶ スタート';
+      if (running) {
+        interval = setInterval(updateGrid, 200);
+      } else {
+        clearInterval(interval);
+      }
+    });
+
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      grid = Array.from({length: rows}, () => Array(cols).fill(0));
+      drawGrid();
+    });
+
+    drawGrid();
+  </script>
+</body>
+</html>
