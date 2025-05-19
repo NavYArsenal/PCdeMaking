@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>タッチ対応ライフゲーム</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ライフゲーム（複数パターン）</title>
   <style>
     body {
       text-align: center;
@@ -15,7 +14,7 @@
       border: 1px solid #555;
       touch-action: none;
     }
-    button {
+    button, select {
       font-size: 18px;
       margin: 10px;
       padding: 10px 20px;
@@ -24,9 +23,23 @@
 </head>
 <body>
   <h1>ライフゲーム（タブレット対応）</h1>
-  <canvas id="game" width="400" height="400"></canvas><br>
-  <button id="startBtn">▶ スタート</button>
-  <button id="clearBtn">🧹 クリア</button>
+  <canvas id="game" width="400" height="400"></canvas><br />
+  <button id="startBtn">スタート</button>
+  <button id="clearBtn">クリア</button>
+  <select id="patternSelect">
+    <option value="Alpha">アルファ</option>
+    <option value="Bravo">ブラボー</option>
+    <option value="Charlie">チャーリー</option>
+    <option value="Delta">デルタ</option>
+    <option value="Echo">エコー</option>
+    <option value="Foxtrot">フォクストロット</option>
+    <option value="Golf">ゴルフ</option>
+    <option value="Hotel">ホテル</option>
+    <option value="India">インディア</option>
+    <option value="Juliett">ジュリエット</option>
+    <option value="Kilo">キロ</option>
+  </select>
+  <button id="patternBtn">パターン表示</button>
 
   <script>
     const canvas = document.getElementById('game');
@@ -34,9 +47,108 @@
     const rows = 40;
     const cols = 40;
     const cellSize = canvas.width / cols;
-    let grid = Array.from({length: rows}, () => Array(cols).fill(0));
+    let grid = Array.from({ length: rows }, () => Array(cols).fill(0));
     let running = false;
     let interval;
+
+    const patterns = {
+      Alpha: {
+        offsetX: 12,
+        offsetY: 12,
+        cells: [
+          [3, 0],[4, 0],[5, 0],[6, 0],[7, 0],[8, 0],[9, 0],[10, 0],[11, 0],[12, 0],
+          [2, 1],[3, 1],[3, 1],[12, 1],[13, 1],
+          [1, 2],[2, 2],[13, 2],[14, 2],
+          [0, 3],[1, 3],[3, 3],[4, 3],[5, 3],[10, 3],[11, 3],[12, 3],[14, 3],[15, 3],
+          [0, 4],[2, 4],[6, 4],[9, 4],[13, 4],[15, 4],
+          [0, 5],[4, 5],[11, 5],[15, 5],
+          [0, 6],[3, 6],[4, 6],[5, 6],[10, 6],[11, 6],[12, 6],[15, 6],
+          [0, 7],[2, 7],[4, 7],[6, 7],[9, 7],[11, 7],[13, 7],[15, 7],
+          [0, 8],[7, 8],[8, 8],[15, 8],
+          [0, 9],[7, 9],[8, 9],[15, 9],
+          [0, 10],[4, 10],[7, 10],[8, 10],[11, 10],[15, 10],
+          [0, 11],[1, 11],[3, 11],[4, 11],[11, 11],[12, 11],[14, 11],[15, 11],
+          [1, 12],[2, 12],[5, 12],[7, 12],[8, 12],[10, 12],[13, 12],[14, 12],
+          [2, 13],[3, 13],[6, 13],[9, 13],[12, 13],[13, 13],
+          [3, 14],[4, 14],[11, 14],[12, 14],
+          [4, 15],[5, 15],[6, 15],[7, 15],[8, 15],[9, 15],[10, 15],[11, 15]
+]
+      },
+      Bravo: {
+        offsetX: 10,
+        offsetY: 10,
+        cells: [
+          [0, 0], [1, 0], [2, 0]
+        ]
+      },
+      Charlie: {
+        offsetX: 15,
+        offsetY: 15,
+        cells: [
+          [0, 0], [1, 0], [2, 0]
+        ]
+      },
+      Delta: {
+        offsetX: 15,
+        offsetY: 15,
+        cells: [
+                   [1, 0], [2, 0], [3, 0],
+          [0, 1], [1, 1], [2, 1]
+        ]
+      },
+      Echo: {
+        offsetX: 20,
+        offsetY: 20,
+        cells: [
+          [0, 0], [1, 0], [2, 0]
+        ]
+      },
+      Foxtrot: {
+        offsetX: 25,
+        offsetY: 25,
+        cells: [
+          [0, 0], [1, 0], [2, 0]
+        ]
+      },
+      Golf: {
+        offsetX: 30,
+        offsetY: 30,
+        cells: [
+          [0, 0], [1, 0], [2, 0]
+        ]
+      },
+      Hotel: {
+        offsetX: 35,
+        offsetY: 35,
+        cells: [
+          [0, 0], [1, 0], [2, 0]
+        ]
+      },
+      India: {
+        offsetX: 20,
+        offsetY: 20,
+        cells: [
+                   [1, 0], [2, 0], [3, 0],
+          [0, 1], [1, 1], [2, 1]
+        ]
+      },
+      Juliett: {
+        offsetX: 25,
+        offsetY: 25,
+        cells: [
+                   [1, 0], [2, 0], [3, 0],
+          [0, 1], [1, 1], [2, 1]
+        ]
+      },
+      Kilo: {
+        offsetX: 30,
+        offsetY: 30,
+        cells: [
+                   [1, 0], [2, 0], [3, 0],
+          [0, 1], [1, 1], [2, 1]
+        ]
+      }
+    };
 
     function drawGrid() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -82,23 +194,35 @@
       }
     }
 
-    // PC マウス用イベント
+    function loadPattern(name) {
+      if (!patterns[name]) return;
+      grid = Array.from({ length: rows }, () => Array(cols).fill(0));
+      const { offsetX, offsetY, cells } = patterns[name];
+      for (const [x, y] of cells) {
+        const gx = offsetX + x;
+        const gy = offsetY + y;
+        if (gx >= 0 && gx < cols && gy >= 0 && gy < rows) {
+          grid[gy][gx] = 1;
+        }
+      }
+      drawGrid();
+    }
+
     canvas.addEventListener('mousedown', e => {
       const rect = canvas.getBoundingClientRect();
       toggleCell(e.clientX - rect.left, e.clientY - rect.top);
     });
 
-    // タブレット・スマホ タッチ用イベント
     canvas.addEventListener('touchstart', e => {
       const rect = canvas.getBoundingClientRect();
       const touch = e.touches[0];
       toggleCell(touch.clientX - rect.left, touch.clientY - rect.top);
       e.preventDefault();
-    }, {passive: false});
+    }, { passive: false });
 
     document.getElementById('startBtn').addEventListener('click', () => {
       running = !running;
-      document.getElementById('startBtn').textContent = running ? '⏸ ストップ' : '▶ スタート';
+      document.getElementById('startBtn').textContent = running ? 'ストップ' : 'スタート';
       if (running) {
         interval = setInterval(updateGrid, 200);
       } else {
@@ -107,8 +231,13 @@
     });
 
     document.getElementById('clearBtn').addEventListener('click', () => {
-      grid = Array.from({length: rows}, () => Array(cols).fill(0));
+      grid = Array.from({ length: rows }, () => Array(cols).fill(0));
       drawGrid();
+    });
+
+    document.getElementById('patternBtn').addEventListener('click', () => {
+      const selected = document.getElementById('patternSelect').value;
+      loadPattern(selected);
     });
 
     drawGrid();
